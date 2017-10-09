@@ -2,15 +2,27 @@
 
 namespace ZapMap\ZapMapLaravel\API;
 
+use ZapMap\ZapMapLaravel\API\Exceptions\ClientException;
+use ZapMap\ZapMapLaravel\API\Exceptions\InvalidKeyException;
+
 class Client{
 
+    private $client;
+
     public function call($method, $uri, $data = []){
-        $client = new \GuzzleHttp\Client([
+
+        $this->client = new \GuzzleHttp\Client([
             'base_uri' => config('zapmap.baseURI'),
         ]);
+
+        $apiKey = config('zapmap.apiKey');
+        if(empty($apiKey)){
+            throw new InvalidKeyException('Please enter your ZapMap API Key in .env');
+        }
+
         $requestOptions = [
             'headers' => [
-                'Authorization' => 'Bearer '.config('zapmap.apiKey'),
+                'Authorization' => 'Bearer '.$apiKey,
                 'Accept' => 'application/json',
             ],
         ];
@@ -19,9 +31,23 @@ class Client{
         }else{
             $requestOptions['form_params'] = $data;
         }
-        $request = $client->request($method, $uri, $requestOptions);
-        $response = $request->getBody();
-        return $response->getContents();
+        return $this->handleRequest($method, $uri, $requestOptions)->getContents();
+    }
+
+    private function handleRequest($method, $uri, $requestOptions){
+        try {
+            $request = $this->client->request($method, $uri, $requestOptions);
+            return $request->getBody();
+        } catch (\GuzzleHttp\Exception\ClientException $error){
+            switch ($error->getResponse()->getStatusCode()) {
+                case '401':
+                    throw new InvalidKeyException('Unable to authenticate, please verify your FilePile API key');
+                    break;
+            }
+        } catch (\ErrorException $error){
+            throw new ClientException($error->getMessage());
+        }
+        return null;
     }
 
 }

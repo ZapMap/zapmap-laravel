@@ -2,12 +2,22 @@
 
 namespace ZapMap\ZapMapLaravel;
 
+use ZapMap\ZapMapLaravel\API\Exceptions\ClientException;
+use ZapMap\ZapMapLaravel\API\Exceptions\InvalidKeyException;
+
 class ZapMap{
 
     public function call($method, $uri, $data=[]){
         $client = new \ZapMap\ZapMapLaravel\API\Client();
-        $response = $client->call($method, $uri, $data);
-        return json_decode($response);
+        try{
+            $response = $client->call($method, $uri, $data);
+            return json_decode($response);
+        }catch (ClientException $exception){
+            return null;
+        }catch (InvalidKeyException $exception){
+            return null;
+        }
+        return null;
     }
 
 }
