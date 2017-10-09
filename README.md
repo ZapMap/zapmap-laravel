@@ -14,6 +14,12 @@ If using Laravel older than 5.5, add to your config/app.php providers array:
 ZapMap\ZapMapLaravel\Providers\ZapMapLaravelServiceProvider::class,
 ```
 
+And the Facade to the aliases array:
+
+```
+'ZapMap' => ZapMap\ZapMapLaravel\Facades\ZapMap::class,
+```
+
 ## Getting Started
 
 1. [Create a ZapMap.us account](https://zapmap.us/register)
