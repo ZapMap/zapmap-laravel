@@ -41,7 +41,10 @@ class Client{
         } catch (\GuzzleHttp\Exception\ClientException $error){
             switch ($error->getResponse()->getStatusCode()) {
                 case '401':
-                    throw new InvalidKeyException('Unable to authenticate, please verify your FilePile API key');
+                    throw new InvalidKeyException('Unable to authenticate, please verify your ZapMap API key');
+                    break;
+                default:
+                    throw new ClientException($error->getMessage().'|'.$error->getResponse()->getStatusCode());
                     break;
             }
         } catch (\ErrorException $error){
